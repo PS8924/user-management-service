@@ -1,0 +1,16 @@
+{
+  "name": "user-management-service",
+  "version": "1.0.0",
+  "description": "A user-management-service for Stat Health",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1542.0",
+    "dotenv": "^16.4.0"
+  }
+}

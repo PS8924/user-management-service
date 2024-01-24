@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Lambda function, DynamoDB table, and S3 bucket setup for user creation'
+
+Resources:
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'YourLambdaFunctionName'
+      Handler: 'index.handler'  # Updated to reference handler.js
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: 'nodejs14.x'
+      Timeout: 30
+      MemorySize: 128
+      Code:
+        S3Bucket: 'YourS3BucketWithLambdaCode'
+        S3Key: 'path/to/your/lambda-code.zip'
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: 'YourDynamoDBTableName'
+          S3_BUCKET_NAME: 'YourS3BucketName'
+
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'YourLambdaExecutionRoleName'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'LambdaExecutionPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:PutItem'
+                Resource:
+                  - !GetAtt DynamoDBTable.Arn
+              - Effect: 'Allow'
+                Action:
+                  - 's3:PutObject'
+                Resource: !Sub 'arn:aws:s3:::${S3_BUCKET_NAME}/*'
+
+  DynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: 'YourDynamoDBTableName'
+      AttributeDefinitions:
+        - AttributeName: 'UserId'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'UserId'
+          KeyType: 'HASH'
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+Outputs:
+  LambdaFunctionArn:
+    Value: !GetAtt LambdaFunction.Arn
+    Description: 'ARN of the Lambda function'
+
+  DynamoDBTableArn:
+    Value: !GetAtt DynamoDBTable.Arn
+    Description: 'ARN of the DynamoDB table'
